@@ -1,0 +1,131 @@
+import java.util.ArrayList
+import java.util.Scanner
+
+// Classe para representar um contato de emergência
+internal data class Contato(var nome: String, var telefone: String, var categoria: String)
+
+// Classe para gerenciar os contatos de emergência
+internal class GerenciadorDeContatos {
+    private val contatos: ArrayList<Contato> = ArrayList()
+
+    fun adicionarContato(contato: Contato) {
+        contatos.add(contato)
+    }
+
+    fun removerContato(nome: String) {
+        contatos.removeIf { contato -> contato.nome == nome }
+    }
+
+    fun listarContatos() {
+        if (contatos.isEmpty()) {
+            println("Nenhum contato cadastrado.")
+        } else {
+            for (contato in contatos) {
+                println(contato)
+            }
+        }
+    }
+
+    fun buscarContato(nome: String): Contato? {
+        return contatos.find { it.nome == nome }
+    }
+}
+
+// Classe para gerenciar mensagens de emergência
+internal class MensagemEmergencia(val tipo: String, val mensagem: String) {
+    private val destinatarios: ArrayList<Contato> = ArrayList()
+
+    fun adicionarDestinatario(contato: Contato) {
+        destinatarios.add(contato)
+    }
+
+    fun enviarMensagens() {
+        if (destinatarios.isEmpty()) {
+            println("Nenhum destinatário definido.")
+        } else {
+            for (contato in destinatarios) {
+                println("Enviando mensagem para ${contato.nome} (${contato.telefone}): $mensagem")
+            }
+        }
+    }
+}
+
+// Classe principal do aplicativo
+internal object GuardianApp {
+    @JvmStatic
+    fun main(args: Array<String>) {
+        val gerenciadorDeContatos = GerenciadorDeContatos()
+        val scanner = Scanner(System.`in`)
+
+        while (true) {
+            println("Bem-vindo ao Guardian!")
+            println("1. Adicionar Contato")
+            println("2. Remover Contato")
+            println("3. Listar Contatos")
+            println("4. Enviar Mensagem de Emergência")
+            println("5. Sair")
+
+            val opcao = scanner.nextInt()
+            scanner.nextLine() // Consumir a nova linha após o número
+
+            when (opcao) {
+                1 -> {
+                    // Adicionar contato
+                    println("Digite o nome do contato:")
+                    val nome = scanner.nextLine()
+                    println("Digite o telefone do contato:")
+                    val telefone = scanner.nextLine()
+                    println("Digite a categoria (família, amigos, autoridades, etc.):")
+                    val categoria = scanner.nextLine()
+                    val novoContato = Contato(nome, telefone, categoria)
+                    gerenciadorDeContatos.adicionarContato(novoContato)
+                }
+
+                2 -> {
+                    // Remover contato
+                    println("Digite o nome do contato a ser removido:")
+                    val nomeRemover = scanner.nextLine()
+                    gerenciadorDeContatos.removerContato(nomeRemover)
+                }
+
+                3 -> {
+                    // Listar contatos
+                    gerenciadorDeContatos.listarContatos()
+                }
+
+                4 -> {
+                    // Enviar mensagem de emergência
+                    println("Digite o tipo de emergência (roubo, acidente, sequestro, etc.):")
+                    val tipoEmergencia = scanner.nextLine()
+                    println("Digite a mensagem de emergência:")
+                    val mensagem = scanner.nextLine()
+                    val msgEmergencia = MensagemEmergencia(tipoEmergencia, mensagem)
+
+                    // Adicionar destinatários
+                    println("Digite o nome do contato para enviar a mensagem (ou 'fim' para parar):")
+                    while (true) {
+                        val nomeContato = scanner.nextLine()
+                        if (nomeContato == "fim") break
+                        val contato = gerenciadorDeContatos.buscarContato(nomeContato)
+                        if (contato != null) {
+                            msgEmergencia.adicionarDestinatario(contato)
+                        } else {
+                            println("Contato não encontrado.")
+                        }
+                    }
+                    // Enviar mensagens
+                    msgEmergencia.enviarMensagens()
+                }
+
+                5 -> {
+                    // Sair
+                    println("Saindo do aplicativo Guardian. Fique seguro!")
+                    scanner.close()
+                    return // Saia do programa
+                }
+
+                else -> println("Opção inválida.")
+            }
+        }
+    }
+}
